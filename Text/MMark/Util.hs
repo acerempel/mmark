@@ -35,6 +35,8 @@ asPlainText = foldMap $ \case
   LineBreak      -> "\n"
   Emphasis    xs -> asPlainText xs
   Strong      xs -> asPlainText xs
+  AlternateVoice  xs -> asPlainText xs
+  Distinguished   xs -> asPlainText xs
   Strikeout   xs -> asPlainText xs
   Subscript   xs -> asPlainText xs
   Superscript xs -> asPlainText xs

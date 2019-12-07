@@ -37,6 +37,8 @@ applyInlineTrans :: Endo Inline -> Inline -> Inline
 applyInlineTrans trans@(Endo f) = \case
   Emphasis     xs -> f (Emphasis    (s xs))
   Strong       xs -> f (Strong      (s xs))
+  AlternateVoice  xs -> f (AlternateVoice (s xs))
+  Distinguished   xs -> f (Distinguished  (s xs))
   Strikeout    xs -> f (Strikeout   (s xs))
   Subscript    xs -> f (Subscript   (s xs))
   Superscript  xs -> f (Superscript (s xs))

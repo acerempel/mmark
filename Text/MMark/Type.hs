@@ -204,6 +204,10 @@ data Inline
     -- ^ Emphasis
   | Strong (NonEmpty Inline)
     -- ^ Strong emphasis
+  | AlternateVoice (NonEmpty Inline)
+    -- ^ Corresponds to the HTML <i> tag.
+  | Distinguished (NonEmpty Inline)
+    -- ^ Corresponds to the HTML <b> tag.
   | Strikeout (NonEmpty Inline)
     -- ^ Strikeout
   | Subscript (NonEmpty Inline)

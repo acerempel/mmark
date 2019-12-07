@@ -156,6 +156,10 @@ defaultInlineRender inlineRender = \case
     em_ (mapM_ inlineRender inner)
   Strong inner ->
     strong_ (mapM_ inlineRender inner)
+  AlternateVoice inner ->
+    i_ (mapM_ inlineRender inner)
+  Distinguished inner ->
+    b_ (mapM_ inlineRender inner)
   Strikeout inner ->
     del_ (mapM_ inlineRender inner)
   Subscript inner ->

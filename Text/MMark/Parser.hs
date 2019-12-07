@@ -1112,8 +1112,8 @@ liftFrame :: InlineFrame -> NonEmpty Inline -> Inline
 liftFrame = \case
   StrongFrame      -> Strong
   EmphasisFrame    -> Emphasis
-  StrongFrame_     -> Strong
-  EmphasisFrame_   -> Emphasis
+  StrongFrame_     -> Distinguished
+  EmphasisFrame_   -> AlternateVoice
   StrikeoutFrame   -> Strikeout
   SubscriptFrame   -> Subscript
   SuperscriptFrame -> Superscript
