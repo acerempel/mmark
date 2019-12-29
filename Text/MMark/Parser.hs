@@ -176,6 +176,7 @@ pBlock = do
   if done || alevel < rlevel then empty else
     case compare alevel (ilevel rlevel) of
       LT -> choice
+        -- rlevel - alevel < 4
         [ Just <$> pThematicBreak
         , Just <$> pAtxHeading
         , Just <$> pFencedCodeBlock
@@ -186,6 +187,8 @@ pBlock = do
         , pReferenceDef
         , Just <$> pParagraph ]
       _  ->
+          -- rlevel - alevel >= 4 (a code block is defined by a 4-space
+          -- indent)
           Just <$> pIndentedCodeBlock
 
 -- | Parse a thematic break.
@@ -406,18 +409,31 @@ pBlockquote = do
   minLevel <- try $ do
     minLevel <- (<> pos1) <$> L.indentLevel
     void (char '>')
+    -- sc *can* consume newlines -- that is why the indent level may
+    -- decrease; see below.
     eof <|> sc
     l <- L.indentLevel
     return $
+      -- If there was whitespace between the '>' and the text, then the
+      -- minlevel is after the '>' plus one space (allowing for first line
+      -- indent), whereas if there was no space after the '>', minlevel is
+      -- immediately after the '>'.
       if l > minLevel
         then minLevel <> pos1
         else minLevel
   indLevel <- L.indentLevel
   if indLevel >= minLevel
     then do
+      -- This allows for a first line indent of no less than four spaces.
+      -- (Less than four, and if the following lines are less indented,
+      -- that will be understood as the end of the blockquote.)
       let rlevel = slevel minLevel indLevel
       xs <- subEnv False rlevel pBlocks
       return (Blockquote xs)
+    -- We will enter this branch only if we encountered a newline before hitting
+    -- any non-whitespace after the '>'. (But we won't if there was
+    -- sufficient whitespace after the newline to bring us back to the
+    -- reference indent level.)
     else return (Blockquote [])
 
 -- | Parse a link\/image reference definition and register it.
@@ -525,8 +541,13 @@ pParagraph = do
         broken <- succeeds . lookAhead . try $ do
           sc
           alevel <- L.indentLevel
+          -- If the indent has increased by four, an indented code block is
+          -- beginning; this paragraph breaks off.
           guard (alevel < ilevel rlevel)
+          -- If the indent has decreased, this paragraph is broken off.
           unless (alevel < rlevel) . choice $
+            -- If the indent is the same or the same plus 3 or less, the
+            -- paragraph is broken off if any of these succeed.
             [ void (char '>')
             , void pThematicBreak
             , void pAtxHeading
