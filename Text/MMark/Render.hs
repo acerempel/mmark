@@ -90,6 +90,12 @@ defaultBlockRender blockRender = \case
     html >> newline
   Paragraph (_,html) ->
     p_ html >> newline
+  Stanza lines ->
+    let lineRender (Line indent (_,html)) =
+          span_ [style_ (lineIndent indent)] html >> br_ [] >> newline
+        lineIndent pos =
+          "margin-inline-start: " <> T.pack (show pos) <> "em"
+    in p_ $ mapM_ lineRender lines
   Blockquote blocks -> do
     blockquote_ (newline <* mapM_ blockRender blocks)
     newline

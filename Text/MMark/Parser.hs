@@ -184,6 +184,7 @@ pBlock = do
         , Just <$> pUnorderedList
         , Just <$> pOrderedList
         , Just <$> pBlockquote
+        , Just <$> pStanza
         , pReferenceDef
         , Just <$> pParagraph ]
       _  ->
@@ -436,6 +437,34 @@ pBlockquote = do
     -- reference indent level.)
     else return (Blockquote [])
 
+pStanza :: BParser (Block Isp)
+pStanza = do
+  minLevel <- try $ do
+    void (char '|')
+    minLevel' <- L.indentLevel
+    eof <|> sc
+    l <- L.indentLevel
+    return $
+      if l > minLevel'
+        then minLevel' <> pos1
+        else minLevel'
+  indLevel <- L.indentLevel
+  if indLevel >= minLevel
+    then do
+      Stanza <$> subEnv False minLevel (many pLine)
+    else return (Stanza [])
+
+pLine :: BParser (Line Isp)
+pLine = do
+  current <- L.indentLevel
+  ref <- refLevel
+  guard (current >= ref)
+  offset <- getOffset
+  line <- takeWhileP Nothing (/= '\n')
+  sc
+  let indent = unPos current - unPos ref
+  return $ Line indent (IspSpan offset line)
+
 -- | Parse a link\/image reference definition and register it.
 
 pReferenceDef :: BParser (Maybe (Block Isp))
@@ -549,6 +578,7 @@ pParagraph = do
             -- If the indent is the same or the same plus 3 or less, the
             -- paragraph is broken off if any of these succeed.
             [ void (char '>')
+            , void (char '|')
             , void pThematicBreak
             , void pAtxHeading
             , void pOpeningFence

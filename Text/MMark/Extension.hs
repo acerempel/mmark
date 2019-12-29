@@ -80,6 +80,7 @@ module Text.MMark.Extension
     -- ** Block-level manipulation
   , Bni
   , Block (..)
+  , Line (..)
   , CellAlign (..)
   , blockTrans
   , blockRender

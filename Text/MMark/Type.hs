@@ -22,6 +22,7 @@ module Text.MMark.Type
   , Render (..)
   , Bni
   , Block (..)
+  , Line (..)
   , CellAlign (..)
   , Inline (..)
   , Ois
@@ -161,6 +162,8 @@ data Block a
     -- ^ Naked content, without an enclosing tag
   | Paragraph a
     -- ^ Paragraph, leaf block
+  | Stanza [Line a]
+    -- ^ Stanza, leaf block
   | Blockquote [Block a]
     -- ^ Blockquote container block
   | OrderedList Word (NonEmpty [Block a])
@@ -179,6 +182,11 @@ data Block a
   deriving (Show, Eq, Ord, Data, Typeable, Generic, Functor, Foldable)
 
 instance NFData a => NFData (Block a)
+
+data Line a = Line Int a
+  deriving (Show, Eq, Ord, Data, Typeable, Generic, Functor, Foldable)
+
+instance NFData a => NFData (Line a)
 
 -- | Options for cell alignment in tables.
 --
